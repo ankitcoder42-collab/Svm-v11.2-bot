@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# SVM v11.2 login banner. Display-only: it does not change SSH, PAM, or other MOTD files.
+set -u
+
+if [[ -t 1 ]]; then
+  CYN=$'\033[38;5;51m'
+  GRN=$'\033[38;5;82m'
+  MAG=$'\033[38;5;213m'
+  GRY=$'\033[38;5;245m'
+  WHT=$'\033[97m'
+  RST=$'\033[0m'
+else
+  CYN=''
+  GRN=''
+  MAG=''
+  GRY=''
+  WHT=''
+  RST=''
+fi
+
+hostname_value="$(hostname 2>/dev/null || printf 'unknown')"
+os_value="$(. /etc/os-release 2>/dev/null; printf '%s' "${PRETTY_NAME:-Linux}")"
+kernel_value="$(uname -r 2>/dev/null || printf 'unknown')"
+uptime_value="$(uptime -p 2>/dev/null | sed 's/^up //')"
+uptime_value="${uptime_value:-unknown}"
+load_value="$(awk '{print $1 " / " $2 " / " $3}' /proc/loadavg 2>/dev/null || printf 'N/A')"
+memory_value="$(free -h 2>/dev/null | awk '/^Mem:/ {print $3 " used / " $2}' || true)"
+memory_value="${memory_value:-N/A}"
+disk_value="$(df -h / 2>/dev/null | awk 'NR==2 {print $3 " used / " $2 " (" $5 ")"}' || true)"
+disk_value="${disk_value:-N/A}"
+ip_value="$(hostname -I 2>/dev/null | awk '{print $1}')"
+ip_value="${ip_value:-N/A}"
+
+printf '\n%b' "$MAG"
+cat <<'LOGO'
+   ███████╗██╗   ██╗███╗   ███╗
+   ██╔════╝██║   ██║████╗ ████║
+   ███████╗██║   ██║██╔████╔██║
+   ╚════██║╚██╗ ██╔╝██║╚██╔╝██║
+   ███████║ ╚████╔╝ ██║ ╚═╝ ██║
+   ╚══════╝  ╚═══╝  ╚═╝     ╚═╝
+LOGO
+printf '%b' "$RST"
+printf '%bWelcome to SVM v11.2%b\n' "$GRN" "$RST"
+printf '%b────────────────────────────────────────────────────────%b\n' "$GRY" "$RST"
+printf '%b%-18s%b %s\n' "$CYN" 'Hostname:' "$RST" "$hostname_value"
+printf '%b%-18s%b %s\n' "$CYN" 'Operating system:' "$RST" "$os_value"
+printf '%b%-18s%b %s\n' "$CYN" 'Kernel:' "$RST" "$kernel_value"
+printf '%b%-18s%b %s\n' "$CYN" 'Uptime:' "$RST" "$uptime_value"
+printf '%b%-18s%b %s\n' "$CYN" 'Load average:' "$RST" "$load_value"
+printf '%b%-18s%b %s\n' "$CYN" 'Memory:' "$RST" "$memory_value"
+printf '%b%-18s%b %s\n' "$CYN" 'Root disk:' "$RST" "$disk_value"
+printf '%b%-18s%b %s\n' "$CYN" 'Private IP:' "$RST" "$ip_value"
+printf '%b────────────────────────────────────────────────────────%b\n' "$GRY" "$RST"
+printf '%bSVM managed VPS%b • Services are reported by their own health checks.\n' "$WHT" "$RST"
+printf '\n'
