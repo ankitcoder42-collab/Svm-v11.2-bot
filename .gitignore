@@ -1,0 +1,13 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.db
+*.db-shm
+*.db-wal
+*.log
+backups/
+data/
+run/
+ai.disabled
